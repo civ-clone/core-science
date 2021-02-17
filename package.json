@@ -1,6 +1,7 @@
 {
   "name": "@civ-clone/core-science",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "main": "index.js",
   "repository": "git@github.com:civ-clone/core-science.git",
   "keywords": [
     "typescript",
