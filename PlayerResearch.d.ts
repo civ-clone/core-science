@@ -3,7 +3,10 @@ import { RuleRegistry } from '@civ-clone/core-rule/RuleRegistry';
 import Advance from './Advance';
 import Player from '@civ-clone/core-player/Player';
 import { Research } from './Yields';
-export interface IPlayerResearch {
+import DataObject, {
+  IDataObject,
+} from '@civ-clone/core-data-object/DataObject';
+export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
   addAdvance(CompleteAdvance: typeof Advance): void;
   available(): Advance[];
@@ -16,7 +19,9 @@ export interface IPlayerResearch {
   research(AdvanceToResearch: typeof Advance): void;
   researching(): typeof Advance | null;
 }
-export declare class PlayerResearch implements IPlayerResearch {
+export declare class PlayerResearch
+  extends DataObject
+  implements IPlayerResearch {
   #private;
   constructor(
     player: Player,

@@ -22,8 +22,10 @@ const Cost_1 = require("./Rules/Cost");
 const Started_1 = require("./Rules/Started");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
 const Yields_1 = require("./Yields");
-class PlayerResearch {
+const DataObject_1 = require("@civ-clone/core-data-object/DataObject");
+class PlayerResearch extends DataObject_1.default {
     constructor(player, advanceRegistry = AdvanceRegistry_1.instance, rulesRegistry = RuleRegistry_1.instance) {
+        super();
         _advanceRegistry.set(this, void 0);
         _complete.set(this, []);
         _researching.set(this, null);
@@ -34,6 +36,7 @@ class PlayerResearch {
         __classPrivateFieldSet(this, _advanceRegistry, advanceRegistry);
         __classPrivateFieldSet(this, _player, player);
         __classPrivateFieldSet(this, _rulesRegistry, rulesRegistry);
+        this.addKey('available', 'complete', 'cost', 'progress', 'researching');
     }
     add(researchYield) {
         __classPrivateFieldGet(this, _progress).add(researchYield);

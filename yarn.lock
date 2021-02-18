@@ -8,9 +8,9 @@
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
 "@civ-clone/core-civilization@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@civ-clone/core-civilization/-/core-civilization-0.1.0.tgz#4d24c7350a706e88a17826a77120efee142c2763"
-  integrity sha512-OtX4KLV8j9PvIJK45MNQPCoIXMEQnO25R+laVGkGSFDr8DeWlMFCFn+ceQFRzVEvAcx41hiEmcIC8vg0XvYo8g==
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@civ-clone/core-civilization/-/core-civilization-0.1.1.tgz#c576c9e3de520a2f3f5e113188ba3f347b73f2b3"
+  integrity sha512-+Wvy+RliVtHPLaE9mBjWJFXbJoMDvkDx0Xvvzm8s1LBn2DTE0px6P2zLUKpWhYMM++ujRzzRjXNI5qf40oIXfw==
   dependencies:
     "@civ-clone/core-data-object" "^0.1.0"
     "@civ-clone/core-registry" "^0.1.0"
@@ -87,9 +87,9 @@
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
 
 "@types/mocha@^8.0.3":
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-8.2.0.tgz#3eb56d13a1de1d347ecb1957c6860c911704bc44"
-  integrity sha512-/Sge3BymXo4lKc31C8OINJgXLaw+7vL1/L1pGiBNpGrBiT8FQiaFpSYV0uhTaG4y78vcMBTMFsWaHDvuD+xGzQ==
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-8.2.1.tgz#f3f3ae4590c5386fc7c543aae9b78d4cf30ffee9"
+  integrity sha512-NysN+bNqj6E0Hv4CTGWSlPzMW6vTKjDpOteycDkV4IWBsO+PU48JonrPzV9ODjiI2XrjmA05KInLgF5ivZ/YGQ==
 
 "@types/node@^14.11.2":
   version "14.14.28"
@@ -182,9 +182,9 @@ buffer-from@^1.0.0, buffer-from@^1.1.0:
   integrity sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A==
 
 c8@^7.3.1:
-  version "7.5.0"
-  resolved "https://registry.yarnpkg.com/c8/-/c8-7.5.0.tgz#a69439ab82848f344a74bb25dc5dd4e867764481"
-  integrity sha512-GSkLsbvDr+FIwjNSJ8OwzWAyuznEYGTAd1pzb/Kr0FMLuV4vqYJTyjboDTwmlUNAG6jAU3PFWzqIdKrOt1D8tw==
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/c8/-/c8-7.6.0.tgz#0d3b1d01b662beea51a40be33db830a48edd5d3d"
+  integrity sha512-cQYCSepX54npWqOKAmRWwOnmN2XPyShpP3Hnw2VoaB/8fdiIke72tKClHLim4U5kSTFc1vjit0771oe+BL7qHw==
   dependencies:
     "@bcoe/v8-coverage" "^0.2.3"
     "@istanbuljs/schema" "^0.1.2"

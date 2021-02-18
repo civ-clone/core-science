@@ -16,8 +16,11 @@ import {
 import Advance from './Advance';
 import Player from '@civ-clone/core-player/Player';
 import { Research } from './Yields';
+import DataObject, {
+  IDataObject,
+} from '@civ-clone/core-data-object/DataObject';
 
-export interface IPlayerResearch {
+export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
   addAdvance(CompleteAdvance: typeof Advance): void;
   available(): Advance[];
@@ -31,7 +34,7 @@ export interface IPlayerResearch {
   researching(): typeof Advance | null;
 }
 
-export class PlayerResearch implements IPlayerResearch {
+export class PlayerResearch extends DataObject implements IPlayerResearch {
   #advanceRegistry: AdvanceRegistry;
   #complete: Advance[] = [];
   #researching: typeof Advance | null = null;
@@ -45,9 +48,13 @@ export class PlayerResearch implements IPlayerResearch {
     advanceRegistry: AdvanceRegistry = advanceRegistryInstance,
     rulesRegistry: RuleRegistry = ruleRegistryInstance
   ) {
+    super();
+
     this.#advanceRegistry = advanceRegistry;
     this.#player = player;
     this.#rulesRegistry = rulesRegistry;
+
+    this.addKey('available', 'complete', 'cost', 'progress', 'researching');
   }
 
   add(researchYield: Research): void {
