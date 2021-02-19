@@ -9,7 +9,7 @@ import DataObject, {
 export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
   addAdvance(CompleteAdvance: typeof Advance): void;
-  available(): Advance[];
+  available(): typeof Advance[];
   check(): void;
   complete(): Advance[];
   completed(CompleteAdvance: typeof Advance): boolean;
