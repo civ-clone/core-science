@@ -6,7 +6,8 @@ import {
 export interface IAdvanceRegistry extends IConstructorRegistry<Advance> {}
 export declare class AdvanceRegistry
   extends ConstructorRegistry<Advance>
-  implements IAdvanceRegistry {
+  implements IAdvanceRegistry
+{
   constructor();
 }
 export declare const instance: AdvanceRegistry;

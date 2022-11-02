@@ -1,3 +1,4 @@
+import { expect, spy, use } from 'chai';
 import Advance from '../Advance';
 import AdvanceRegistry from '../AdvanceRegistry';
 import Complete from '../Rules/Complete';
@@ -9,10 +10,7 @@ import PlayerResearch from '../PlayerResearch';
 import Requirements from '../Rules/Requirements';
 import Research from '../Yields/Research';
 import RuleRegistry from '@civ-clone/core-rule/RuleRegistry';
-import * as chai from 'chai';
 import * as spies from 'chai-spies';
-
-const { expect, use } = chai;
 
 use(spies);
 
@@ -62,11 +60,11 @@ describe('PlayerResearch', (): void => {
         ruleRegistry
       ),
       Test = class extends Advance {},
-      spy = chai.spy();
+      effectSpy = spy();
 
     ruleRegistry.register(
       new Cost(new Effect(() => 10)),
-      new Complete(new Effect(spy))
+      new Complete(new Effect(effectSpy))
     );
 
     advanceRegistry.register(Test);
@@ -84,7 +82,7 @@ describe('PlayerResearch', (): void => {
     playerResearch.add(new Research(5));
 
     expect(playerResearch.progress().value()).to.equal(0);
-    expect(spy).to.called.once;
+    expect(effectSpy).to.called.once;
     expect(playerResearch.complete().some((advance) => advance instanceof Test))
       .to.true;
     expect(playerResearch.completed(Test)).to.true;
@@ -99,23 +97,23 @@ describe('PlayerResearch', (): void => {
         ruleRegistry
       ),
       Test = class extends Advance {},
-      spy = chai.spy();
+      effectSpy = spy();
 
     ruleRegistry.register(
       new Cost(new Effect(() => 10)),
-      new Complete(new Effect(spy))
+      new Complete(new Effect(effectSpy))
     );
 
     advanceRegistry.register(Test);
     playerResearch.research(Test);
     playerResearch.addAdvance(Test);
 
-    expect(spy).to.called.once;
+    expect(effectSpy).to.called.once;
     expect(playerResearch.complete().some((advance) => advance instanceof Test))
       .to.true;
 
     playerResearch.addAdvance(Test);
 
-    expect(spy).to.called.once;
+    expect(effectSpy).to.called.once;
   });
 });

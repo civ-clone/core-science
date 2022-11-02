@@ -2,23 +2,21 @@ import {
   AdvanceRegistry,
   instance as advanceRegistryInstance,
 } from './AdvanceRegistry';
-import { Complete, IResearchCompleteRegistry } from './Rules/Complete';
 import {
-  Requirements,
-  IResearchRequirementsRegistry,
-} from './Rules/Requirements';
-import { Cost, IResearchCostRegistry } from './Rules/Cost';
-import { Started, IResearchStartedRegistry } from './Rules/Started';
+  DataObject,
+  IDataObject,
+} from '@civ-clone/core-data-object/DataObject';
 import {
   RuleRegistry,
   instance as ruleRegistryInstance,
 } from '@civ-clone/core-rule/RuleRegistry';
 import Advance from './Advance';
+import Complete from './Rules/Complete';
+import Cost from './Rules/Cost';
 import Player from '@civ-clone/core-player/Player';
+import Requirements from './Rules/Requirements';
 import { Research } from './Yields';
-import DataObject, {
-  IDataObject,
-} from '@civ-clone/core-data-object/DataObject';
+import Started from './Rules/Started';
 
 export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
@@ -79,16 +77,11 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
     const completedResearch = new CompleteAdvance();
 
     this.#complete.push(completedResearch);
-    (this.#rulesRegistry as IResearchCompleteRegistry).process(
-      Complete,
-      this,
-      completedResearch
-    );
+    this.#rulesRegistry.process(Complete, this, completedResearch);
   }
 
   available(): typeof Advance[] {
-    const rules: Requirements[] = (this
-      .#rulesRegistry as IResearchRequirementsRegistry).get(Requirements);
+    const rules: Requirements[] = this.#rulesRegistry.get(Requirements);
 
     return this.#advanceRegistry.filter(
       (AvailableAdvance: typeof Advance): boolean =>
@@ -119,11 +112,7 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
 
       this.#cost.set(Infinity);
 
-      (this.#rulesRegistry as IResearchCompleteRegistry).process(
-        Complete,
-        this,
-        completedResearch
-      );
+      this.#rulesRegistry.process(Complete, this, completedResearch);
     }
   }
 
@@ -150,20 +139,12 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
   }
 
   research(AdvanceToResearch: typeof Advance): void {
-    const [cost] = (this.#rulesRegistry as IResearchCostRegistry).process(
-      Cost,
-      AdvanceToResearch,
-      this
-    );
+    const [cost] = this.#rulesRegistry.process(Cost, AdvanceToResearch, this);
 
     this.#cost.set(cost);
     this.#researching = AdvanceToResearch;
 
-    (this.#rulesRegistry as IResearchStartedRegistry).process(
-      Started,
-      this,
-      AdvanceToResearch
-    );
+    this.#rulesRegistry.process(Started, this, AdvanceToResearch);
   }
 
   researching(): typeof Advance | null {

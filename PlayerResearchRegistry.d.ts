@@ -9,7 +9,8 @@ interface IPlayerResearchRegistry extends IEntityRegistry<PlayerResearch> {
 }
 export declare class PlayerResearchRegistry
   extends EntityRegistry<PlayerResearch>
-  implements IPlayerResearchRegistry {
+  implements IPlayerResearchRegistry
+{
   constructor();
   getByPlayer(player: Player): PlayerResearch;
 }

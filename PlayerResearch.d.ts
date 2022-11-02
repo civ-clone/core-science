@@ -1,11 +1,12 @@
 import { AdvanceRegistry } from './AdvanceRegistry';
+import {
+  DataObject,
+  IDataObject,
+} from '@civ-clone/core-data-object/DataObject';
 import { RuleRegistry } from '@civ-clone/core-rule/RuleRegistry';
 import Advance from './Advance';
 import Player from '@civ-clone/core-player/Player';
 import { Research } from './Yields';
-import DataObject, {
-  IDataObject,
-} from '@civ-clone/core-data-object/DataObject';
 export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
   addAdvance(CompleteAdvance: typeof Advance): void;
@@ -21,7 +22,8 @@ export interface IPlayerResearch extends IDataObject {
 }
 export declare class PlayerResearch
   extends DataObject
-  implements IPlayerResearch {
+  implements IPlayerResearch
+{
   #private;
   constructor(
     player: Player,

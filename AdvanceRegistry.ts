@@ -8,7 +8,8 @@ export interface IAdvanceRegistry extends IConstructorRegistry<Advance> {}
 
 export class AdvanceRegistry
   extends ConstructorRegistry<Advance>
-  implements IAdvanceRegistry {
+  implements IAdvanceRegistry
+{
   constructor() {
     super(Advance);
   }
