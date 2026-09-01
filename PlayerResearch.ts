@@ -33,13 +33,13 @@ export interface IPlayerResearch extends IDataObject {
 }
 
 export class PlayerResearch extends DataObject implements IPlayerResearch {
-  #advanceRegistry: AdvanceRegistry;
-  #complete: Advance[] = [];
-  #researching: typeof Advance | null = null;
-  #player: Player;
-  #cost: Research = new Research(Infinity);
-  #progress: Research = new Research(0);
-  #rulesRegistry: RuleRegistry;
+  private _advanceRegistry: AdvanceRegistry;
+  private _complete: Advance[] = [];
+  private _researching: typeof Advance | null = null;
+  private _player: Player;
+  private _cost: Research = new Research(Infinity);
+  private _progress: Research = new Research(0);
+  private _rulesRegistry: RuleRegistry;
 
   constructor(
     player: Player,
@@ -48,52 +48,52 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
   ) {
     super();
 
-    this.#advanceRegistry = advanceRegistry;
-    this.#player = player;
-    this.#rulesRegistry = rulesRegistry;
+    this._advanceRegistry = advanceRegistry;
+    this._player = player;
+    this._rulesRegistry = rulesRegistry;
 
     this.addKey('available', 'complete', 'cost', 'progress', 'researching');
   }
 
   add(researchYield: Research): void {
-    this.#progress.add(researchYield);
+    this._progress.add(researchYield);
 
     this.check();
   }
 
   addAdvance(CompleteAdvance: typeof Advance): void {
     if (
-      this.#complete.some(
+      this._complete.some(
         (advance: Advance): boolean => advance instanceof CompleteAdvance
       )
     ) {
       return;
     }
 
-    if (this.#researching === CompleteAdvance) {
-      this.#researching = null;
+    if (this._researching === CompleteAdvance) {
+      this._researching = null;
     }
 
     const completedResearch = new CompleteAdvance();
 
-    this.#complete.push(completedResearch);
-    this.#rulesRegistry.process(Complete, this, completedResearch);
+    this._complete.push(completedResearch);
+    this._rulesRegistry.process(Complete, this, completedResearch);
   }
 
   available(): typeof Advance[] {
-    const rules: Requirements[] = this.#rulesRegistry.get(Requirements);
+    const rules: Requirements[] = this._rulesRegistry.get(Requirements);
 
-    return this.#advanceRegistry.filter(
+    return this._advanceRegistry.filter(
       (AvailableAdvance: typeof Advance): boolean =>
         rules
           .filter((rule: Requirements): boolean =>
-            rule.validate(AvailableAdvance, this.#complete)
+            rule.validate(AvailableAdvance, this._complete)
           )
           .every(
             (rule: Requirements): boolean =>
-              rule.process(AvailableAdvance, this.#complete) === true
+              rule.process(AvailableAdvance, this._complete) === true
           ) &&
-        !this.#complete.some(
+        !this._complete.some(
           (advance: Advance): boolean => advance instanceof AvailableAdvance
         )
     );
@@ -101,54 +101,54 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
 
   check(): void {
     if (
-      this.#researching !== null &&
-      this.#progress.value() >= this.#cost.value()
+      this._researching !== null &&
+      this._progress.value() >= this._cost.value()
     ) {
-      const completedResearch = new this.#researching();
+      const completedResearch = new this._researching();
 
-      this.#complete.push(completedResearch);
-      this.#researching = null;
-      this.#progress.subtract(this.#cost);
+      this._complete.push(completedResearch);
+      this._researching = null;
+      this._progress.subtract(this._cost);
 
-      this.#cost.set(Infinity);
+      this._cost.set(Infinity);
 
-      this.#rulesRegistry.process(Complete, this, completedResearch);
+      this._rulesRegistry.process(Complete, this, completedResearch);
     }
   }
 
   complete(): Advance[] {
-    return this.#complete;
+    return this._complete;
   }
 
   completed(CompleteAdvance: typeof Advance): boolean {
-    return this.#complete.some(
+    return this._complete.some(
       (advance: Advance): boolean => advance instanceof CompleteAdvance
     );
   }
 
   cost(): Research {
-    return this.#cost;
+    return this._cost;
   }
 
   player(): Player {
-    return this.#player;
+    return this._player;
   }
 
   progress(): Research {
-    return this.#progress;
+    return this._progress;
   }
 
   research(AdvanceToResearch: typeof Advance): void {
-    const [cost] = this.#rulesRegistry.process(Cost, AdvanceToResearch, this);
+    const [cost] = this._rulesRegistry.process(Cost, AdvanceToResearch, this);
 
-    this.#cost.set(cost);
-    this.#researching = AdvanceToResearch;
+    this._cost.set(cost);
+    this._researching = AdvanceToResearch;
 
-    this.#rulesRegistry.process(Started, this, AdvanceToResearch);
+    this._rulesRegistry.process(Started, this, AdvanceToResearch);
   }
 
   researching(): typeof Advance | null {
-    return this.#researching;
+    return this._researching;
   }
 }
 

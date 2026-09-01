@@ -24,7 +24,13 @@ export declare class PlayerResearch
   extends DataObject
   implements IPlayerResearch
 {
-  #private;
+  private _advanceRegistry;
+  private _complete;
+  private _researching;
+  private _player;
+  private _cost;
+  private _progress;
+  private _rulesRegistry;
   constructor(
     player: Player,
     advanceRegistry?: AdvanceRegistry,
