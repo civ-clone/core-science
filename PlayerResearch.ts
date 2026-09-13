@@ -33,6 +33,7 @@ export interface IPlayerResearch extends IDataObject {
 }
 
 export class PlayerResearch extends DataObject implements IPlayerResearch {
+  static readonly transient = ['_advanceRegistry', '_rulesRegistry'];
   private _advanceRegistry: AdvanceRegistry;
   private _complete: Advance[] = [];
   private _researching: typeof Advance | null = null;

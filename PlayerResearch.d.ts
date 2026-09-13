@@ -24,6 +24,7 @@ export declare class PlayerResearch
   extends DataObject
   implements IPlayerResearch
 {
+  static readonly transient: string[];
   private _advanceRegistry;
   private _complete;
   private _researching;

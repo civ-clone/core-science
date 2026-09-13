@@ -80,5 +80,6 @@ class PlayerResearch extends DataObject_1.DataObject {
     }
 }
 exports.PlayerResearch = PlayerResearch;
+PlayerResearch.transient = ['_advanceRegistry', '_rulesRegistry'];
 exports.default = PlayerResearch;
 //# sourceMappingURL=PlayerResearch.js.map
