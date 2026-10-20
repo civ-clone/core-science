@@ -116,4 +116,53 @@ describe('PlayerResearch', (): void => {
 
     expect(effectSpy).to.called.once;
   });
+
+  it('should offer a repeatable `Advance` again once it is known', (): void => {
+    const advanceRegistry = new AdvanceRegistry(),
+      ruleRegistry = new RuleRegistry(),
+      playerResearch = new PlayerResearch(
+        new Player(),
+        advanceRegistry,
+        ruleRegistry
+      ),
+      Once = class extends Advance {},
+      Repeatable = class extends Advance {
+        static readonly repeatable = true;
+      },
+      effectSpy = spy();
+
+    ruleRegistry.register(
+      new Cost(new Effect(() => 10)),
+      new Complete(new Effect(effectSpy))
+    );
+
+    advanceRegistry.register(Once, Repeatable);
+
+    playerResearch.research(Repeatable);
+    playerResearch.add(new Research(10));
+    playerResearch.addAdvance(Once);
+
+    expect(playerResearch.available()).to.eql([Repeatable]);
+
+    playerResearch.research(Repeatable);
+    playerResearch.add(new Research(10));
+
+    expect(
+      playerResearch
+        .complete()
+        .filter((advance) => advance instanceof Repeatable)
+    ).to.length(2);
+    expect(playerResearch.available()).to.eql([Repeatable]);
+
+    playerResearch.addAdvance(Repeatable);
+    playerResearch.addAdvance(Once);
+
+    expect(
+      playerResearch
+        .complete()
+        .filter((advance) => advance instanceof Repeatable)
+    ).to.length(3);
+    expect(playerResearch.complete()).to.length(4);
+    expect(effectSpy).to.called.exactly(4);
+  });
 });
