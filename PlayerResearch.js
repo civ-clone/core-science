@@ -26,7 +26,8 @@ class PlayerResearch extends DataObject_1.DataObject {
         this.check();
     }
     addAdvance(CompleteAdvance) {
-        if (this._complete.some((advance) => advance instanceof CompleteAdvance)) {
+        if (!CompleteAdvance.repeatable &&
+            this._complete.some((advance) => advance instanceof CompleteAdvance)) {
             return;
         }
         if (this._researching === CompleteAdvance) {
@@ -41,7 +42,8 @@ class PlayerResearch extends DataObject_1.DataObject {
         return this._advanceRegistry.filter((AvailableAdvance) => rules
             .filter((rule) => rule.validate(AvailableAdvance, this._complete))
             .every((rule) => rule.process(AvailableAdvance, this._complete) === true) &&
-            !this._complete.some((advance) => advance instanceof AvailableAdvance));
+            (AvailableAdvance.repeatable ||
+                !this._complete.some((advance) => advance instanceof AvailableAdvance)));
     }
     check() {
         if (this._researching !== null &&

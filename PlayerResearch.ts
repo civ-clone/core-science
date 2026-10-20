@@ -64,6 +64,7 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
 
   addAdvance(CompleteAdvance: typeof Advance): void {
     if (
+      !CompleteAdvance.repeatable &&
       this._complete.some(
         (advance: Advance): boolean => advance instanceof CompleteAdvance
       )
@@ -94,9 +95,10 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
             (rule: Requirements): boolean =>
               rule.process(AvailableAdvance, this._complete) === true
           ) &&
-        !this._complete.some(
-          (advance: Advance): boolean => advance instanceof AvailableAdvance
-        )
+        (AvailableAdvance.repeatable ||
+          !this._complete.some(
+            (advance: Advance): boolean => advance instanceof AvailableAdvance
+          ))
     );
   }
 
