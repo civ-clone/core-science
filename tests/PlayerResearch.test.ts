@@ -165,4 +165,114 @@ describe('PlayerResearch', (): void => {
     expect(playerResearch.complete()).to.length(4);
     expect(effectSpy).to.called.exactly(4);
   });
+  describe('why it is researching nothing (civ-clone/web-renderer#726)', (): void => {
+    const setUp = () => {
+      const advanceRegistry = new AdvanceRegistry(),
+        ruleRegistry = new RuleRegistry(),
+        playerResearch = new PlayerResearch(
+          new Player(),
+          advanceRegistry,
+          ruleRegistry
+        ),
+        Test = class Test extends Advance {},
+        Other = class Other extends Advance {};
+
+      ruleRegistry.register(new Cost(new Effect(() => 10)));
+      advanceRegistry.register(Test, Other);
+
+      return { Other, Test, playerResearch, ruleRegistry };
+    };
+
+    it('should know of no reason to begin with', (): void => {
+      const { playerResearch } = setUp();
+
+      expect(playerResearch.cleared()).to.null;
+    });
+
+    it('should give the advance it discovered', (): void => {
+      const { Test, playerResearch } = setUp();
+
+      playerResearch.research(Test);
+      playerResearch.add(new Research(10));
+
+      expect(playerResearch.researching()).to.null;
+      expect(playerResearch.cleared()).to.eql({
+        reason: 'completed',
+        advance: Test,
+      });
+    });
+
+    it('should give the advance it was researching when it is acquired some other way', (): void => {
+      const { Test, playerResearch } = setUp();
+
+      playerResearch.research(Test);
+      playerResearch.addAdvance(Test);
+
+      expect(playerResearch.cleared()).to.eql({
+        reason: 'acquired',
+        advance: Test,
+      });
+    });
+
+    it('should keep the reason when another advance is acquired', (): void => {
+      const { Other, Test, playerResearch } = setUp();
+
+      playerResearch.research(Test);
+      playerResearch.add(new Research(10));
+      playerResearch.addAdvance(Other);
+
+      expect(playerResearch.cleared()).to.eql({
+        reason: 'completed',
+        advance: Test,
+      });
+    });
+
+    it('should give none while it researches something, and forget it once something is chosen', (): void => {
+      const { Other, Test, playerResearch } = setUp();
+
+      playerResearch.research(Test);
+      playerResearch.add(new Research(10));
+      playerResearch.research(Other);
+
+      expect(playerResearch.cleared()).to.null;
+
+      playerResearch.addAdvance(Test);
+
+      expect(playerResearch.cleared()).to.null;
+    });
+
+    it('should forget it when a `Complete` rule chooses the next', (): void => {
+      const { Other, Test, playerResearch, ruleRegistry } = setUp();
+
+      ruleRegistry.register(
+        new Complete(
+          new Effect((completed: PlayerResearch): void =>
+            completed.research(Other)
+          )
+        )
+      );
+
+      playerResearch.research(Test);
+      playerResearch.add(new Research(10));
+
+      expect(playerResearch.researching()).to.equal(Other);
+      expect(playerResearch.cleared()).to.null;
+    });
+
+    it('should give none for research restored from a save made before it existed', (): void => {
+      const { Test, playerResearch } = setUp();
+
+      playerResearch.research(Test);
+      playerResearch.add(new Research(10));
+      delete (playerResearch as unknown as { _cleared?: unknown })._cleared;
+
+      expect(playerResearch.cleared()).to.null;
+    });
+
+    it('should be sent with the research', (): void => {
+      const { playerResearch } = setUp();
+
+      expect(playerResearch.keys()).to.include('cleared');
+    });
+  });
 });
