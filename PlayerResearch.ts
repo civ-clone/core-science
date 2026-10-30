@@ -18,11 +18,23 @@ import Requirements from './Rules/Requirements';
 import { Research } from './Yields';
 import Started from './Rules/Started';
 
+/**
+ * Why a player is researching nothing (civ-clone/web-renderer#726): they discovered `advance` (`completed`), or were
+ *  given the advance they were researching some other way (`acquired`). A ruleset may give its own reasons.
+ */
+export type PlayerResearchClearedReason = 'acquired' | 'completed' | string;
+
+export interface IPlayerResearchCleared {
+  reason: PlayerResearchClearedReason;
+  advance: typeof Advance;
+}
+
 export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
   addAdvance(CompleteAdvance: typeof Advance): void;
   available(): typeof Advance[];
   check(): void;
+  cleared(): IPlayerResearchCleared | null;
   complete(): Advance[];
   completed(CompleteAdvance: typeof Advance): boolean;
   cost(): Research;
@@ -35,6 +47,7 @@ export interface IPlayerResearch extends IDataObject {
 export class PlayerResearch extends DataObject implements IPlayerResearch {
   static readonly transient = ['_advanceRegistry', '_rulesRegistry'];
   private _advanceRegistry: AdvanceRegistry;
+  private _cleared: IPlayerResearchCleared | null = null;
   private _complete: Advance[] = [];
   private _researching: typeof Advance | null = null;
   private _player: Player;
@@ -53,7 +66,14 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
     this._player = player;
     this._rulesRegistry = rulesRegistry;
 
-    this.addKey('available', 'complete', 'cost', 'progress', 'researching');
+    this.addKey(
+      'available',
+      'cleared',
+      'complete',
+      'cost',
+      'progress',
+      'researching'
+    );
   }
 
   add(researchYield: Research): void {
@@ -74,6 +94,13 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
 
     if (this._researching === CompleteAdvance) {
       this._researching = null;
+      this._cleared = {
+        reason: 'acquired',
+        advance: CompleteAdvance,
+      };
+    } else if (this._researching === null) {
+      // Researching nothing, the last reason is no longer the latest news (civ-clone/web-renderer#726).
+      this._cleared = null;
     }
 
     const completedResearch = new CompleteAdvance();
@@ -110,6 +137,10 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
       const completedResearch = new this._researching();
 
       this._complete.push(completedResearch);
+      this._cleared = {
+        reason: 'completed',
+        advance: this._researching,
+      };
       this._researching = null;
       this._progress.subtract(this._cost);
 
@@ -117,6 +148,19 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
 
       this._rulesRegistry.process(Complete, this, completedResearch);
     }
+  }
+
+  /**
+   * Why the player is researching nothing, or `null` while they research something, or when that isn't known (a new
+   *  game, or an older save).
+   */
+  cleared(): IPlayerResearchCleared | null {
+    if (this._researching !== null) {
+      return null;
+    }
+
+    // A player's research restored from a save made before this existed has no `_cleared` at all.
+    return this._cleared ?? null;
   }
 
   complete(): Advance[] {
@@ -146,6 +190,7 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
 
     this._cost.set(cost);
     this._researching = AdvanceToResearch;
+    this._cleared = null;
 
     this._rulesRegistry.process(Started, this, AdvanceToResearch);
   }
