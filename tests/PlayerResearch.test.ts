@@ -214,17 +214,14 @@ describe('PlayerResearch', (): void => {
       });
     });
 
-    it('should keep the reason when another advance is acquired', (): void => {
+    it('should forget the reason when another advance is acquired while researching nothing', (): void => {
       const { Other, Test, playerResearch } = setUp();
 
       playerResearch.research(Test);
       playerResearch.add(new Research(10));
       playerResearch.addAdvance(Other);
 
-      expect(playerResearch.cleared()).to.eql({
-        reason: 'completed',
-        advance: Test,
-      });
+      expect(playerResearch.cleared()).to.null;
     });
 
     it('should give none while it researches something, and forget it once something is chosen', (): void => {

@@ -38,6 +38,10 @@ class PlayerResearch extends DataObject_1.DataObject {
                 advance: CompleteAdvance,
             };
         }
+        else if (this._researching === null) {
+            // Researching nothing, the last reason is no longer the latest news (civ-clone/web-renderer#726).
+            this._cleared = null;
+        }
         const completedResearch = new CompleteAdvance();
         this._complete.push(completedResearch);
         this._rulesRegistry.process(Complete_1.default, this, completedResearch);

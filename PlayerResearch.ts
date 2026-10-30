@@ -98,6 +98,9 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
         reason: 'acquired',
         advance: CompleteAdvance,
       };
+    } else if (this._researching === null) {
+      // Researching nothing, the last reason is no longer the latest news (civ-clone/web-renderer#726).
+      this._cleared = null;
     }
 
     const completedResearch = new CompleteAdvance();
