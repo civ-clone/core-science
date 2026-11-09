@@ -32,7 +32,7 @@ export interface IPlayerResearchCleared {
 export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
   addAdvance(CompleteAdvance: typeof Advance): void;
-  available(): typeof Advance[];
+  available(): (typeof Advance)[];
   check(): void;
   cleared(): IPlayerResearchCleared | null;
   complete(): Advance[];
@@ -43,6 +43,17 @@ export interface IPlayerResearch extends IDataObject {
   research(AdvanceToResearch: typeof Advance): void;
   researching(): typeof Advance | null;
 }
+
+// What a player's research sends a client: the constructor adds them, and `onHydrated` adds any that a save from before
+//  one was added doesn't have.
+const playerResearchKeys: (keyof PlayerResearch)[] = [
+  'available',
+  'cleared',
+  'complete',
+  'cost',
+  'progress',
+  'researching',
+];
 
 export class PlayerResearch extends DataObject implements IPlayerResearch {
   static readonly transient = ['_advanceRegistry', '_rulesRegistry'];
@@ -66,14 +77,17 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
     this._player = player;
     this._rulesRegistry = rulesRegistry;
 
-    this.addKey(
-      'available',
-      'cleared',
-      'complete',
-      'cost',
-      'progress',
-      'researching'
-    );
+    this.addKey(...playerResearchKeys);
+  }
+
+  /**
+   * A save keeps the keys the research had when it was made, so research loaded from a save made before a key existed
+   *  would never send it, however often it was saved again (civ-clone/web-renderer#870). Adds those it's missing.
+   */
+  onHydrated(): void {
+    const keys = this.keys();
+
+    this.addKey(...playerResearchKeys.filter((key) => !keys.includes(key)));
   }
 
   add(researchYield: Research): void {
@@ -109,7 +123,7 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
     this._rulesRegistry.process(Complete, this, completedResearch);
   }
 
-  available(): typeof Advance[] {
+  available(): (typeof Advance)[] {
     const rules: Requirements[] = this._rulesRegistry.get(Requirements);
 
     return this._advanceRegistry.filter(

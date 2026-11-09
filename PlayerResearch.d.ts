@@ -11,10 +11,7 @@ import { Research } from './Yields';
  * Why a player is researching nothing (civ-clone/web-renderer#726): they discovered `advance` (`completed`), or were
  *  given the advance they were researching some other way (`acquired`). A ruleset may give its own reasons.
  */
-export declare type PlayerResearchClearedReason =
-  | 'acquired'
-  | 'completed'
-  | string;
+export type PlayerResearchClearedReason = 'acquired' | 'completed' | string;
 export interface IPlayerResearchCleared {
   reason: PlayerResearchClearedReason;
   advance: typeof Advance;
@@ -22,7 +19,7 @@ export interface IPlayerResearchCleared {
 export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
   addAdvance(CompleteAdvance: typeof Advance): void;
-  available(): typeof Advance[];
+  available(): (typeof Advance)[];
   check(): void;
   cleared(): IPlayerResearchCleared | null;
   complete(): Advance[];
@@ -51,9 +48,14 @@ export declare class PlayerResearch
     advanceRegistry?: AdvanceRegistry,
     rulesRegistry?: RuleRegistry
   );
+  /**
+   * A save keeps the keys the research had when it was made, so research loaded from a save made before a key existed
+   *  would never send it, however often it was saved again (civ-clone/web-renderer#870). Adds those it's missing.
+   */
+  onHydrated(): void;
   add(researchYield: Research): void;
   addAdvance(CompleteAdvance: typeof Advance): void;
-  available(): typeof Advance[];
+  available(): (typeof Advance)[];
   check(): void;
   /**
    * Why the player is researching nothing, or `null` while they research something, or when that isn't known (a new
