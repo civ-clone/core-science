@@ -271,5 +271,34 @@ describe('PlayerResearch', (): void => {
 
       expect(playerResearch.keys()).to.include('cleared');
     });
+
+    it('should be sent by research loaded from a save made before it existed (civ-clone/web-renderer#870)', (): void => {
+      const { playerResearch } = setUp(),
+        loaded = Object.assign(
+          Object.create(PlayerResearch.prototype),
+          playerResearch,
+          {
+            _keys: playerResearch.keys().filter((key) => key !== 'cleared'),
+          }
+        ) as PlayerResearch;
+
+      expect(loaded.keys()).to.not.include('cleared');
+
+      loaded.onHydrated();
+
+      expect(loaded.keys()).to.include('cleared');
+      expect(
+        loaded.keys().filter((key) => key === 'researching').length
+      ).to.equal(1);
+    });
+
+    it('should add nothing to research that already sends it', (): void => {
+      const { playerResearch } = setUp(),
+        before = [...playerResearch.keys()];
+
+      playerResearch.onHydrated();
+
+      expect(playerResearch.keys()).to.eql(before);
+    });
   });
 });

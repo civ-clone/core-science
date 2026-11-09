@@ -9,6 +9,16 @@ const Cost_1 = require("./Rules/Cost");
 const Requirements_1 = require("./Rules/Requirements");
 const Yields_1 = require("./Yields");
 const Started_1 = require("./Rules/Started");
+// What a player's research sends a client: the constructor adds them, and `onHydrated` adds any that a save from before
+//  one was added doesn't have.
+const playerResearchKeys = [
+    'available',
+    'cleared',
+    'complete',
+    'cost',
+    'progress',
+    'researching',
+];
 class PlayerResearch extends DataObject_1.DataObject {
     constructor(player, advanceRegistry = AdvanceRegistry_1.instance, rulesRegistry = RuleRegistry_1.instance) {
         super();
@@ -20,7 +30,15 @@ class PlayerResearch extends DataObject_1.DataObject {
         this._advanceRegistry = advanceRegistry;
         this._player = player;
         this._rulesRegistry = rulesRegistry;
-        this.addKey('available', 'cleared', 'complete', 'cost', 'progress', 'researching');
+        this.addKey(...playerResearchKeys);
+    }
+    /**
+     * A save keeps the keys the research had when it was made, so research loaded from a save made before a key existed
+     *  would never send it, however often it was saved again (civ-clone/web-renderer#870). Adds those it's missing.
+     */
+    onHydrated() {
+        const keys = this.keys();
+        this.addKey(...playerResearchKeys.filter((key) => !keys.includes(key)));
     }
     add(researchYield) {
         this._progress.add(researchYield);
