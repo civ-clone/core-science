@@ -27,6 +27,9 @@ class PlayerResearch extends DataObject_1.DataObject {
         this._researching = null;
         this._cost = new Yields_1.Research(Infinity);
         this._progress = new Yields_1.Research(0);
+        // The advances the player started the game with, which are in `_complete` too. Missing from a game saved before it
+        //  was kept, as a loaded game's fields are restored, not initialised: `startingAdvances()` reads that as none.
+        this._starting = [];
         this._advanceRegistry = advanceRegistry;
         this._player = player;
         this._rulesRegistry = rulesRegistry;
@@ -44,7 +47,11 @@ class PlayerResearch extends DataObject_1.DataObject {
         this._progress.add(researchYield);
         this.check();
     }
-    addAdvance(CompleteAdvance) {
+    /**
+     * Adds `CompleteAdvance` to the advances the player knows, unless it's known already and not repeatable. `starting`:
+     *  whether it's one the player starts the game with (`startingAdvances()`), rather than one gained in play.
+     */
+    addAdvance(CompleteAdvance, { starting = false } = {}) {
         if (!CompleteAdvance.repeatable &&
             this._complete.some((advance) => advance instanceof CompleteAdvance)) {
             return;
@@ -62,6 +69,9 @@ class PlayerResearch extends DataObject_1.DataObject {
         }
         const completedResearch = new CompleteAdvance();
         this._complete.push(completedResearch);
+        if (starting) {
+            this._starting = [...this.startingAdvances(), completedResearch];
+        }
         this._rulesRegistry.process(Complete_1.default, this, completedResearch);
     }
     available() {
@@ -123,6 +133,14 @@ class PlayerResearch extends DataObject_1.DataObject {
     }
     researching() {
         return this._researching;
+    }
+    /**
+     * The advances the player started the game with (`addAdvance`'s `starting`), in the order they were added: those of
+     *  `complete()` that weren't gained in play. None for a game saved before they were kept.
+     */
+    startingAdvances() {
+        var _a;
+        return (_a = this._starting) !== null && _a !== void 0 ? _a : [];
     }
 }
 exports.PlayerResearch = PlayerResearch;

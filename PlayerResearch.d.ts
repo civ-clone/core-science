@@ -16,9 +16,16 @@ export interface IPlayerResearchCleared {
   reason: PlayerResearchClearedReason;
   advance: typeof Advance;
 }
+/** How an advance is added: `starting`, whether the player starts the game with it rather than gaining it in play. */
+export interface AddAdvanceOptions {
+  starting?: boolean;
+}
 export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
-  addAdvance(CompleteAdvance: typeof Advance): void;
+  addAdvance(
+    CompleteAdvance: typeof Advance,
+    options?: AddAdvanceOptions
+  ): void;
   available(): (typeof Advance)[];
   check(): void;
   cleared(): IPlayerResearchCleared | null;
@@ -29,6 +36,7 @@ export interface IPlayerResearch extends IDataObject {
   progress(): Research;
   research(AdvanceToResearch: typeof Advance): void;
   researching(): typeof Advance | null;
+  startingAdvances(): Advance[];
 }
 export declare class PlayerResearch
   extends DataObject
@@ -43,6 +51,7 @@ export declare class PlayerResearch
   private _cost;
   private _progress;
   private _rulesRegistry;
+  private _starting?;
   constructor(
     player: Player,
     advanceRegistry?: AdvanceRegistry,
@@ -54,7 +63,14 @@ export declare class PlayerResearch
    */
   onHydrated(): void;
   add(researchYield: Research): void;
-  addAdvance(CompleteAdvance: typeof Advance): void;
+  /**
+   * Adds `CompleteAdvance` to the advances the player knows, unless it's known already and not repeatable. `starting`:
+   *  whether it's one the player starts the game with (`startingAdvances()`), rather than one gained in play.
+   */
+  addAdvance(
+    CompleteAdvance: typeof Advance,
+    { starting }?: AddAdvanceOptions
+  ): void;
   available(): (typeof Advance)[];
   check(): void;
   /**
@@ -69,5 +85,10 @@ export declare class PlayerResearch
   progress(): Research;
   research(AdvanceToResearch: typeof Advance): void;
   researching(): typeof Advance | null;
+  /**
+   * The advances the player started the game with (`addAdvance`'s `starting`), in the order they were added: those of
+   *  `complete()` that weren't gained in play. None for a game saved before they were kept.
+   */
+  startingAdvances(): Advance[];
 }
 export default PlayerResearch;
