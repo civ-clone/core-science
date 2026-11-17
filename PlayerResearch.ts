@@ -29,9 +29,17 @@ export interface IPlayerResearchCleared {
   advance: typeof Advance;
 }
 
+/** How an advance is added: `starting`, whether the player starts the game with it rather than gaining it in play. */
+export interface AddAdvanceOptions {
+  starting?: boolean;
+}
+
 export interface IPlayerResearch extends IDataObject {
   add(researchYield: Research): void;
-  addAdvance(CompleteAdvance: typeof Advance): void;
+  addAdvance(
+    CompleteAdvance: typeof Advance,
+    options?: AddAdvanceOptions
+  ): void;
   available(): (typeof Advance)[];
   check(): void;
   cleared(): IPlayerResearchCleared | null;
@@ -42,6 +50,7 @@ export interface IPlayerResearch extends IDataObject {
   progress(): Research;
   research(AdvanceToResearch: typeof Advance): void;
   researching(): typeof Advance | null;
+  startingAdvances(): Advance[];
 }
 
 // What a player's research sends a client: the constructor adds them, and `onHydrated` adds any that a save from before
@@ -65,6 +74,9 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
   private _cost: Research = new Research(Infinity);
   private _progress: Research = new Research(0);
   private _rulesRegistry: RuleRegistry;
+  // The advances the player started the game with, which are in `_complete` too. Missing from a game saved before it
+  //  was kept, as a loaded game's fields are restored, not initialised: `startingAdvances()` reads that as none.
+  private _starting?: Advance[] = [];
 
   constructor(
     player: Player,
@@ -96,7 +108,14 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
     this.check();
   }
 
-  addAdvance(CompleteAdvance: typeof Advance): void {
+  /**
+   * Adds `CompleteAdvance` to the advances the player knows, unless it's known already and not repeatable. `starting`:
+   *  whether it's one the player starts the game with (`startingAdvances()`), rather than one gained in play.
+   */
+  addAdvance(
+    CompleteAdvance: typeof Advance,
+    { starting = false }: AddAdvanceOptions = {}
+  ): void {
     if (
       !CompleteAdvance.repeatable &&
       this._complete.some(
@@ -120,6 +139,11 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
     const completedResearch = new CompleteAdvance();
 
     this._complete.push(completedResearch);
+
+    if (starting) {
+      this._starting = [...this.startingAdvances(), completedResearch];
+    }
+
     this._rulesRegistry.process(Complete, this, completedResearch);
   }
 
@@ -211,6 +235,14 @@ export class PlayerResearch extends DataObject implements IPlayerResearch {
 
   researching(): typeof Advance | null {
     return this._researching;
+  }
+
+  /**
+   * The advances the player started the game with (`addAdvance`'s `starting`), in the order they were added: those of
+   *  `complete()` that weren't gained in play. None for a game saved before they were kept.
+   */
+  startingAdvances(): Advance[] {
+    return this._starting ?? [];
   }
 }
 

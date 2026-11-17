@@ -165,6 +165,62 @@ describe('PlayerResearch', (): void => {
     expect(playerResearch.complete()).to.length(4);
     expect(effectSpy).to.called.exactly(4);
   });
+  it('should keep the advances the player started with apart from those gained in play (civ-clone/web-renderer#973)', (): void => {
+    const ruleRegistry = new RuleRegistry(),
+      playerResearch = new PlayerResearch(
+        new Player(),
+        new AdvanceRegistry(),
+        ruleRegistry
+      ),
+      First = class extends Advance {},
+      Second = class extends Advance {},
+      Gained = class extends Advance {},
+      effectSpy = spy();
+
+    ruleRegistry.register(new Complete(new Effect(effectSpy)));
+
+    expect(playerResearch.startingAdvances()).to.empty;
+
+    playerResearch.addAdvance(First, { starting: true });
+    playerResearch.addAdvance(Second, { starting: true });
+    playerResearch.addAdvance(Gained);
+    // Known already: neither added again nor marked as a starting advance.
+    playerResearch.addAdvance(Gained, { starting: true });
+
+    expect(playerResearch.complete()).to.length(3);
+    expect(
+      playerResearch.startingAdvances().map((advance) => advance.constructor)
+    ).to.eql([First, Second]);
+    expect(
+      playerResearch
+        .startingAdvances()
+        .every((advance) => playerResearch.complete().includes(advance))
+    ).to.true;
+    // A starting advance completes as any other does.
+    expect(effectSpy).to.called.exactly(3);
+  });
+
+  it('should read a game saved before starting advances were kept as having none', (): void => {
+    const playerResearch = new PlayerResearch(new Player()),
+      Restored = class extends Advance {};
+
+    // As a loaded game is: its fields restored onto the prototype, without the initialisers.
+    const loaded = Object.assign(
+      Object.create(PlayerResearch.prototype),
+      playerResearch
+    ) as PlayerResearch;
+
+    delete (loaded as unknown as { _starting?: Advance[] })._starting;
+
+    expect(loaded.startingAdvances()).to.eql([]);
+
+    loaded.addAdvance(Restored, { starting: true });
+
+    expect(
+      loaded.startingAdvances().map((advance) => advance.constructor)
+    ).to.eql([Restored]);
+  });
+
   describe('why it is researching nothing (civ-clone/web-renderer#726)', (): void => {
     const setUp = () => {
       const advanceRegistry = new AdvanceRegistry(),
